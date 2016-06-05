@@ -4,8 +4,6 @@ ini_set('error_reporting', -1);
 ini_set('display_errors', 'On');
 
 include 'CacheInterface.php';
-include 'MultipleInterface.php';
-include 'IncrementableInterface.php';
 include 'RedisDriver.php';
 
 use RedisDriver as Cache;
@@ -25,10 +23,10 @@ $res = $cache->get('buzz');
 assert($res === 'bar');
 
 // Remove
-$res = $cache->remove('buzz');
+$res = $cache->delete('buzz');
 assert($res === true);
 
-$res = $cache->remove('buzz');
+$res = $cache->delete('buzz');
 assert($res === false);
 
 // Clear
@@ -49,14 +47,14 @@ $res = $cache->getMultiple(['foo', 'not_defined_key']);
 assert($res === ['foo' => 'value1']);
 
 // Multiple Remove
-$res = $cache->removeMultiple(['bar', 'not_defined_key']);
-assert($res === ['bar' => true, 'not_defined_key' => false]);
+$res = $cache->deleteMultiple(['bar', 'not_defined_key']);
+assert($res === false);
 
 
 // Multiple Remove - After initial set, 'foo' has expired.
 sleep(3);
-$res = $cache->removeMultiple(['foo']);
-assert($res === ['foo' => false]);
+$res = $cache->deleteMultiple(['foo']);
+assert($res === false);
 
 // Increment
 $res = $cache->set('num_users', 19);
@@ -72,11 +70,6 @@ assert(intval($res) === 25);
 $res = $cache->decrement('num_users', 10);
 $res = $cache->get('num_users');
 assert(intval($res) === 15);
-
-// Feature Detection
-assert($cache->supports(Cache::SUPPORTS_MULTIPLE) === true);
-assert($cache->supports(Cache::SUPPORTS_INCDEC) === true);
-assert($cache->supports('non_existent_feature') === false);
 
 // Check the output buffer
 echo (ob_get_length() > 0) ? "UNEXPECTED OUTPUT DETECTED\n" : "ALL TESTS PASSED\n";

@@ -11,7 +11,7 @@ use Psr\SimpleCache\IncrementableInterface;
 * @package    PPI
 * @subpackage Cache
 */
-class RedisDriver implements CacheInterface, MultipleInterface, IncrementableInterface
+class RedisDriver implements CacheInterface
 {
 
     protected $redis;
@@ -21,37 +21,32 @@ class RedisDriver implements CacheInterface, MultipleInterface, IncrementableInt
         $this->redis = $redis;
     }
 
-    public function supports($feature)
-    {
-        switch($feature) {
-            case self::SUPPORTS_MULTIPLE:
-                return $this instanceof MultipleInterface;
-
-            case self::SUPPORTS_INCDEC:
-                return $this instanceof IncrementableInterface;
-
-            default:
-                return false;
-        }
-    }
-
     public function get($key)
     {
         return $this->redis->get($key);
     }
 
-    public function set($key, $value = null, $ttl = null)
+    public function set($key, $value, $ttl = null)
     {
         return $this->redis->set($key, $value, $ttl);
     }
 
-    public function getMultiple($data)
+    public function delete($key)
     {
-        $cacheValues = array_combine($data, $this->redis->mGet($data));
+        return $this->redis->delete($key) > 0;
+    }
+
+    public function clear()
+    {
+        return $this->redis->flushAll();
+    }
+
+    public function getMultiple($keys)
+    {
+        $cacheValues = array_combine($keys, $this->redis->mGet($keys));
 
         foreach ($cacheValues as $key => $value) {
             if($value === false && !$this->redis->exists($key)) {
-                unset($cacheValues[$key]);
                 continue;
             }
             $ret[$key] = $value;
@@ -78,12 +73,7 @@ class RedisDriver implements CacheInterface, MultipleInterface, IncrementableInt
         return true;
     }
 
-    public function remove($key)
-    {
-        return $this->redis->delete($key) > 0;
-    }
-
-    public function removeMultiple($keys)
+    public function deleteMultiple($keys)
     {
         $transaction = $this->redis->multi();
         foreach($keys as $key) {
@@ -92,15 +82,12 @@ class RedisDriver implements CacheInterface, MultipleInterface, IncrementableInt
 
         $result = array_combine($keys, $transaction->exec());
         foreach($result as $key => $val) {
-            $result[$key] = (bool) $val;
+            if(boolval($val) === false) {
+                return false;
+            }
         }
 
-        return $result;
-    }
-
-    public function clear()
-    {
-        return $this->redis->flushAll();
+        return true;
     }
 
     public function increment($key, $step = 1)

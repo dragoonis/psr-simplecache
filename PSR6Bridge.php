@@ -1,3 +1,5 @@
+<?php
+
 namespace Psr\SimpleCache;
 
 use Psr\Cache\CacheItemPoolInterface;

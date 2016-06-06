@@ -33,12 +33,12 @@ class RedisDriver implements CacheInterface
 
     public function delete($key)
     {
-        return $this->redis->delete($key) > 0;
+        $this->redis->delete($key);
     }
 
     public function clear()
     {
-        return $this->redis->flushAll();
+        $this->redis->flushAll();
     }
 
     public function getMultiple($keys)
@@ -79,15 +79,7 @@ class RedisDriver implements CacheInterface
         foreach($keys as $key) {
             $transaction->del($key);
         }
-
-        $result = array_combine($keys, $transaction->exec());
-        foreach($result as $key => $val) {
-            if(boolval($val) === false) {
-                return false;
-            }
-        }
-
-        return true;
+        $transaction->exec();
     }
 
     public function increment($key, $step = 1)

@@ -35,12 +35,12 @@ class PSR6Bridge implements CacheInterface
 
     public function delete($key)
     {
-        return $this->pool->deleteItem($key);
+        $this->pool->deleteItem($key);
     }
 
     public function clear()
     {
-        return $this->pool->clear();
+        $this->pool->clear();
     }
 
     public function getMultiple($keys)
@@ -70,7 +70,7 @@ class PSR6Bridge implements CacheInterface
 
     public function deleteMultiple($keys)
     {
-        return $this->pool->deleteItems($keys);
+        $this->pool->deleteItems($keys);
     }
 
     public function increment($key, $step = 1)

@@ -23,18 +23,12 @@ $res = $cache->get('buzz');
 assert($res === 'bar');
 
 // Remove
-$res = $cache->delete('buzz');
-assert($res === true);
-
-$res = $cache->delete('not_exists');
-assert($res === false);
-
-$res = $cache->delete('buzz');
-assert($res === false);
+$cache->delete('buzz');
+$cache->delete('not_exists');
+$cache->delete('buzz');
 
 // Clear
-$res = $cache->clear();
-assert($res === true);
+$cache->clear();
 
 // Multiple Set
 $cacheData = [
@@ -50,14 +44,11 @@ $res = $cache->getMultiple(['foo', 'not_defined_key']);
 assert($res === ['foo' => 'value1']);
 
 // Multiple Remove
-$res = $cache->deleteMultiple(['bar', 'not_defined_key']);
-assert($res === false);
-
+$cache->deleteMultiple(['bar', 'not_defined_key']);
 
 // Multiple Remove - After initial set, 'foo' has expired.
 sleep(3);
-$res = $cache->deleteMultiple(['foo']);
-assert($res === false);
+$cache->deleteMultiple(['foo']);
 
 // Increment
 $res = $cache->set('num_users', 19);

@@ -26,6 +26,9 @@ assert($res === 'bar');
 $res = $cache->delete('buzz');
 assert($res === true);
 
+$res = $cache->delete('not_exists');
+assert($res === false);
+
 $res = $cache->delete('buzz');
 assert($res === false);
 
